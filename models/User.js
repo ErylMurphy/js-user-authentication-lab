@@ -8,6 +8,8 @@ User.create = user =>
     [user.username, user.password_digest, user.balance]
   );
 
+User.find = id => db.one("SELECT * FROM users WHERE id = $1", [id]);
+
 User.findByUsername = username =>
   db.one("SELECT * FROM users WHERE username = $1", [username]);
 
