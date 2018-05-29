@@ -1,9 +1,13 @@
 const express = require("express");
 const session = require("express-session");
+const bodyParser = require("body-parser");
 
 const PORT = process.env.PORT || 4567;
 
 const app = express();
+
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use(
   session({
