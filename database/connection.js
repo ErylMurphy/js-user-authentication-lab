@@ -20,7 +20,7 @@ monitor.attach(initOptions, ["query", "error"]);
 const pgp = require("pg-promise")(initOptions);
 
 // Prepare the connection URL from the format: 'postgres://username:password@host:port/database';
-const connectionURL = "postgres://localhost:5432/quotestagram";
+const connectionURL = "postgres://localhost:5432/js_user_auth_lab";
 
 // Creating a new database connection with the provided URL.
 const db = pgp(connectionURL);
