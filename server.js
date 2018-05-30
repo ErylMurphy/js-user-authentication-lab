@@ -27,7 +27,7 @@ app.get("/", (request, response) => {
   response.render("home/index");
 });
 
-app.post("/login", async (request, response) => {
+app.post("/login", (request, response) => {
   User.findByUsername(request.body.username).then(user => {
     return bcrypt
       .compare(request.body.password, user.password_digest)
