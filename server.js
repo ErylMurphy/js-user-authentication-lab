@@ -31,8 +31,8 @@ app.post("/login", async (request, response) => {
   User.findByUsername(request.body.username).then(user => {
     return bcrypt
       .compare(request.body.password, user.password_digest)
-      .then(isCorrectPw => {
-        if (isCorrectPw) {
+      .then(isPasswordCorrect => {
+        if (isPasswordCorrect) {
           request.session.loggedIn = true;
           request.session.userId = user.id;
           response.redirect(301, "/your-account");
