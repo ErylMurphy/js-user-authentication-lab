@@ -1,10 +1,14 @@
 const express = require("express");
 const session = require("express-session");
 const bodyParser = require("body-parser");
+const bcrypt = require("bcrypt");
+const User = require("./models/User");
 
 const PORT = process.env.PORT || 4567;
 
 const app = express();
+
+const saltRounds = 10;
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -23,12 +27,54 @@ app.get("/", (request, response) => {
   response.render("home/index");
 });
 
-app.post("/login", (request, response) => {});
+app.post("/login", (request, response) => {
+  User.findByUsername(request.body.username).then(user => {
+    return bcrypt
+      .compare(request.body.password, user.password_digest)
+      .then(isPasswordCorrect => {
+        if (isPasswordCorrect) {
+          request.session.loggedIn = true;
+          request.session.userId = user.id;
+          response.redirect(301, "/your-account");
+        }
+        response.redirect(301, "/");
+      });
+  });
+});
 
-app.post("/register", (request, response) => {});
+app.post("/register", (request, response) => {
+  const password = request.body.password;
+  bcrypt
+    .hash(password, saltRounds)
+    .then(hash => {
+      const newUser = {
+        username: request.body.username,
+        password_digest: hash,
+        balance: request.body.balance
+      };
+      return User.create(newUser);
+    })
+    .then(user => {
+      request.session.loggedIn = true;
+      request.session.userId = user.id;
+      response.redirect(301, "/your-account");
+    });
+});
 
-app.get("/your-account", (request, response) => {
-  response.send("Your balance has XXXXX dollars");
+
+//in middleware we add next which means that the if the conditions are true i.e. the user is logged in, we call the next function which takes the user to the next method. 
+const requireLogin = (request, response, next) => {
+  if (!request.session.loggedIn) {
+    response.status(403).send("You do not have access");
+  }
+  next();
+};
+
+//requireLogin is middleware - you can pass requireLogin into this function
+app.get("/your-account", requireLogin, (request, response) => {
+  User.find(request.session.userId).then(user => {
+    response.send(`Your balance has ${user.balance} dollars`);
+  });
 });
 
 app.listen(PORT, () => {
